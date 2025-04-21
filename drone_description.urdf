@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<robot name="drone" xmlns:xacro="http://ros.org/wiki/xacro">
+<!-- TO DO: CLEAN UP -->
+  <!-- Base Drone Body -->
+  <link name="base_link">
+    <visual>
+      <!-- rotate your drone_body.dae so its "nose" points +X -->
+      <!-- example: yaw +90° if its front was along +Y -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/drone_body.dae"
+              scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+    <!-- … collision/inertial, etc. … -->
+  </link>
+  
+  <!-- Realsense Camera -->
+  <link name="realsense_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/realsense.dae" scale="0.01 0.01 0.01"/>
+        <!-- Adjust scale here if it still looks off -->
+      </geometry>
+    </visual>
+  </link>
+  <joint name="realsense_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="realsense_link"/>
+    <origin xyz="0.148 0 0.065" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Propellers (x4) -->
+  <xacro:macro name="prop" params="name x y">
+    <link name="${name}_link">
+      <visual>
+        <geometry>
+          <mesh filename="package://drone_description/src/meshes/prop.dae" scale="0.01 0.01 0.01"/>
+        </geometry>
+      </visual>
+    </link>
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${x} ${y} 0.062" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+  <xacro:prop name="prop1" x="0.232" y="0.192" />
+  <xacro:prop name="prop2" x="-0.232" y="0.192"/>
+  <xacro:prop name="prop3" x="-0.232" y="-0.192"/>
+  <xacro:prop name="prop4" x="0.232" y="-0.192"/>
+  
+  <!-- Gimbal: Base (fixed to the drone, does not rotate) -->
+  <link name="gimbal_base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/a8_base.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="gimbal_base_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gimbal_base_link"/>
+    <origin xyz="0.126 0 0.052" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Gimbal: Yaw (rotates around Z axis) -->
+  <link name="gimbal_yaw_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/a8_yaw_roll_part.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="gimbal_yaw_joint" type="continuous">
+    <parent link="gimbal_base_link"/>
+    <child link="gimbal_yaw_link"/>
+    <origin xyz="0 0 -0.022" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>  <!-- Rotation around Z axis for yaw -->
+  </joint>
+  
+  <!-- Gimbal: Roll (rotates around X axis) -->
+  <link name="gimbal_roll_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/a8_pitch_part.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="gimbal_roll_joint" type="continuous">
+    <parent link="gimbal_yaw_link"/>
+    <child link="gimbal_roll_link"/>
+    <origin xyz="-0.022 0.001 -0.0322" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>  <!-- Rotation around X axis for roll -->
+  </joint>
+  
+  <!-- Gimbal: Pitch (rotates around Y axis) -->
+  <link name="gimbal_pitch_link">
+    <visual>
+      <geometry>
+        <!-- This can be an invisible link if needed -->
+        <cylinder radius="0.01" length="0.01"/>
+      </geometry>
+      <material name="transparent">
+        <color rgba="0 0 0 0"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="gimbal_pitch_joint" type="continuous">
+    <parent link="gimbal_roll_link"/>
+    <child link="gimbal_pitch_link"/>
+    <origin xyz="0.03 -0.00065 0.0002" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>  <!-- Rotation around Y axis for pitch -->
+  </joint>
+  
+  <!-- Gimbal Camera -->
+  <link name="gimbal_camera_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://drone_description/src/meshes/a8_camera.dae" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </visual>
+  </link>
+  <joint name="gimbal_camera_joint" type="fixed">
+    <parent link="gimbal_pitch_link"/>
+    <child link="gimbal_camera_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</robot>
