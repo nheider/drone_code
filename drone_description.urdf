@@ -15,12 +15,28 @@
     <!-- … collision/inertial, etc. … -->
   </link>
   
+  <!-- Landing Center Point -->
+  <link name="landing_center_point">
+    <visual>
+      <geometry>
+        <sphere radius="0.01"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="landing_center_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="landing_center_point"/>
+    <origin xyz="0.02 0 -0.055" rpy="0 0 0"/>
+  </joint>
+  
   <!-- Realsense Camera -->
   <link name="realsense_link">
     <visual>
       <geometry>
         <mesh filename="package://drone_description/src/meshes/realsense.dae" scale="0.01 0.01 0.01"/>
-        <!-- Adjust scale here if it still looks off -->
       </geometry>
     </visual>
   </link>
@@ -126,5 +142,14 @@
     <parent link="gimbal_pitch_link"/>
     <child link="gimbal_camera_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Gimbal Camera Optical Frame -->
+  <link name="gimbal_camera_optical_frame"/>
+  <joint name="gimbal_camera_optical_joint" type="fixed">
+    <parent link="gimbal_camera_link"/>
+    <child link="gimbal_camera_optical_frame"/>
+  <!-- This rotation converts from standard ROS frame to camera optical frame -->
+    <origin xyz="0 0 0" rpy="-1.57079632679 0 -1.57079632679"/>
   </joint>
 </robot>
