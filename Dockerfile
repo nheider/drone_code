@@ -4,9 +4,8 @@ SHELL ["/bin/bash", "-c"]
 
 # install foxglove bridge
 
-
-
 RUN apt-get update 
+
 
 #RUN apt-cache search foxglove
 
@@ -28,14 +27,19 @@ RUN mkdir -p ~/px4_ros_uxrce_dds/src &&\
 	git clone -b v2.4.2 https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
 	
 # for dusty container it is  /opt/ros/$ROS_DISTRO/install/setup.bash
-RUN mkdir -p ~/drone_ws/src/ &&\
-    cd ~/drone_ws/src/ &&\
+
+RUN mkdir -p ~/drone_ws/src/ 
+
+COPY /src/urdf_node /root/drone_ws/src
+
+RUN cd ~/drone_ws/src/ &&\
 	git clone https://github.com/nheider/siyi_a8_ros2.git &&\
 	git clone https://github.com/christianrauch/apriltag_ros.git &&\
 	git clone https://github.com/christianrauch/apriltag_msgs.git && \
  	cd .. &&\
  	. /opt/ros/jazzy/install/setup.bash &&\           
 	colcon build 
+	
 	
 # for dusty container it is  /opt/ros/$ROS_DISTRO/install/setup.bash
 #RUN mkdir -p ~/drone_ws/src/ &&\
@@ -61,9 +65,11 @@ RUN apt-get update && apt-get install -y \
     gstreamer1.0-pulseaudio \
     libgstreamer-plugins-base1.0-dev \
     libgstreamer1.0-dev \
-    python3-opencv
-
-
+    python3-opencv \
+    ros-${ROS_DISTRO}-joint-state-publisher-gui \
+    ros-${ROS_DISTRO}-xacro 
+    
+COPY /src/apriltag_cfg /share/apriltag_ros/cfg/
 
 # ROS is already sourced in bashrc in dustys container 
 RUN echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc &&\
